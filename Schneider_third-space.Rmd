@@ -1,0 +1,299 @@
+---
+title: Praxisbegleitung in der Cloud. 
+subtitle: Digitale Seminarkonzeption für Praxisphasen erziehungswissenschaftlicher Master-Studiengänge.
+author:
+  - name: Jürgen Schneider
+    affil: 1
+    twitter: artzyatfailing2
+    email: juergen.schneider@uni-tuebingen.de
+    orcid: 0000-0002-3772-4198
+    main: true
+  - name: Marcus Syring
+    affil: 1
+    main: false
+  - name: Britta Kohler
+    affil: 1
+    main: false
+affiliation:
+  - num: 1
+    address: Eberhard Karls Universität Tübingen
+main_findings:
+  - "Fälle werden besonders aus der **Praxisperspektive** gedeutet"
+  - '![](webs/hir.png){.main_pic}'
+main_width: 0.5
+main_picwidth: "90%"
+logoleft_name: ''
+logoright_name: '![](webs/logo.png){.main-img-right}'
+font_family: 'Rasa'
+primary_colour: '#a51e37'
+secondary_colour: '#c57974'
+accent_colour: '#82b9a0'
+title_textsize: "115pt"
+output: 
+  posterdown::posterdown_betterland:
+    self_contained: false
+    pandoc_args: --mathjax
+    highlight: espresso
+    number_sections: false
+link-citations: true
+bibliography: webs/references.bib
+csl: "https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl"
+css: webs/style.css
+---
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(results = 'asis',
+                      echo = FALSE,
+                      warning = FALSE,
+                      tidy = FALSE,
+                      message = FALSE,
+                      fig.align = 'center',
+                      out.width = "100%")
+options(knitr.table.format = "html") 
+
+
+##### Download Bibliography ##### #
+# download.file("https://drive.google.com/uc?export=download&id=1wuMqL_Z8T9rxuGvn0VP6siag90kHDm2O",
+#               "webs/references.bib", overwrite = T)
+
+#### build html and pdf ######### #
+# run in console:
+# pagedown::chrome_print("Schneider_third-space.Rmd")
+```
+
+
+# Theorie
+
+Das __Relationierungskonzept__ [@deweetal.1992] schlägt  Hybridität, also die Aufrechterhaltung wissenschaftlicher Theorie und schulischer Praxis, als differente Perspektiven [@bhabha.1994] bei der Deutung pädagogischer Schlüsselsituationen vor. Ein Third Space ermöglicht demnach hybride Deutungen und die Generierung neuer Bedeutungskonstruktionen [@schneideretal.2020]. Voraussetzung: Studierende konnten sich bereits in beide Kulturen einlassen.
+
+
+  
+  
+## Ziele
+
+1. __Third Spaces__ zur Relationierung von wissenschaft-licher Theorie und schulischer Praxis __eröffnen__.
+2. Sowohl __Einlassung__ auf wissenschaftliche Theorie als auch schulische Praxis __ermöglichen__. 
+
+
+# Methode
+
+1. Blended-Learning Begleitseminar zum Praxissemester
+    * Aufgaben beinhalten wissenschaftlicher Literatur
+    * Deutungen in individueller und kooperativer Fallarbeit<br /><br />
+
+2. Evaluation: Querschnittserhebung von...
+    * Voraussetzung: Ausmaß der Einlassung auf wissenschaftliche Theorie und schulische Praxis
+    * Einbringung von Fällen als Rahmung des Third Space
+    * Hierarchielosigkeit (Hybridität) in der Deutung
+    * Überzeugungen zum Theorie-Praxis-Verhältnis
+
+
+<div style="display: flex;">
+  <div style="width:49%; justify-content: space-between; margin: auto">
+  <center>
+  <img src="webs/ilias.svg" width="45%" />  
+  Kurs Demo:  
+  bit.ly/icpl-demo
+  </center>
+  </div>
+  <div style="width:49%; justify-content: space-between; margin: auto">
+  <center>
+  <img src="webs/formr.svg" width="45%" />  
+  Survey Demo:  
+  icpl-demo.formr.org
+  </center>
+  </div>
+  
+</div>
+
+
+
+
+<br />
+
+# Ergebnisse
+
+Inwiefern konnten sich die Studierenden auf die jeweiligen __Ausbildungsteile einlassen__? 6-stufige Likert Items: _"Während der Praktikumszeit konnte ich mich ganz auf den Schul- und Unterrichtsalltag konzentrieren."_
+```{r einlassung, fig.cap='Einlassung auf Theorie und Praxis', out.width="85%"}
+library(tidyverse)
+icpl_eg <- rio::import("data/icpl.csv") %>%
+             dplyr::filter(created > "2020-01-30" & !str_detect(session, "XXX")) %>%
+             dplyr::select(-c(tfe_1_sr:rel_4_sr)) %>%
+             mutate(Gruppe = "Blended Learning")
+
+icpl_kg <- rio::import("data/icpl_kg.csv") %>%
+             dplyr::filter(created > "2020-02-12" & !str_detect(session, "XXX")) %>%
+             mutate(Gruppe = "Präsenz")
+
+icpl <- bind_rows(icpl_eg, icpl_kg) %>%
+  dplyr::filter(ended != "") %>%
+  mutate(ein_p = rowMeans(data.frame(ein_p_1, (7-ein_p_2))),
+         ein_t = rowMeans(data.frame(ein_t_1, (7-ein_t_2))),
+         hir_p = rowMeans(data.frame(hir_p_1, hir_p_2, hir_p_3)),
+         hir_t = rowMeans(data.frame(hir_t_1, hir_t_2, hir_t_3)))
+
+
+ggplot(icpl, aes(x=ein_p, y=ein_t, color = Gruppe)) +
+  geom_abline(slope = 1, intercept = 0, color = "red", alpha = .2, size = 3) +
+  # geom_jitter(width = .1, height = .1, size = 3) +
+  geom_point(position=position_dodge2(width = .4), size = 3.5, alpha = .6) +
+  scale_x_continuous(limits = c(1,6), breaks = c(1,2,3,4,5,6), expand = c(.05, .05)) +
+  scale_y_continuous(limits = c(1,6), breaks = c(1,2,3,4,5,6), expand = c(.05, .05)) +
+  theme_light()+
+  ylab("Einlassung auf Theorie") +
+  xlab("Einlassung auf Praxis") +
+  theme_light() +
+  coord_fixed() +
+  theme(axis.line = element_line(colour = "#696f71"),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.border = element_blank(),
+        panel.background = element_rect(fill = "#f6f7f7")) +
+  scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+  scale_color_manual(values = c("#D55E00", "#0072B2")) +
+  scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"))
+
+####### Nur fürs Speichern: ##################
+save_plot <- ggplot(icpl, aes(x=hir_p, y=hir_t, color = Gruppe)) +
+                geom_abline(slope = 1, intercept = 0, color = "red", alpha = .2, size = 3) +
+                # geom_jitter(width = .1, height = .1, size = 3) +
+                geom_point(position=position_dodge2(width = .4), size = 3.5, alpha = .6) +
+                scale_x_continuous(limits = c(1,6), breaks = c(1,2,3,4,5,6), expand = c(.05, .05)) +
+                scale_y_continuous(limits = c(1,6), breaks = c(1,2,3,4,5,6), expand = c(.05, .05)) +
+                theme_light() +
+                ylab("Perspektive Theorie") +
+                xlab("Perspektive Praxis") +
+                theme_light() +
+                coord_fixed() +
+                theme(axis.line = element_line(colour = "#696f71"),
+                      panel.grid.major = element_blank(),
+                      panel.grid.minor = element_blank(),
+                      panel.border = element_blank(),
+                      panel.background = element_rect(fill = "#f6f7f7")#,
+                      # plot.background = element_rect(fill = "transparent",colour = NA)
+                      ) +
+  scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+  scale_color_manual(values = c("#D55E00", "#0072B2")) +
+  scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"))
+
+ggsave("webs/hir.png", 
+       plot = save_plot, 
+       device = "png", 
+       dpi = 320, 
+       scale = .4 , 
+       width = 30, 
+       height = 20, 
+       units = "cm"#, 
+       # bg = "transparent"
+       )
+
+```
+\
+
+Inwiefern hat das Seminar die Studierenden dazu angeregt kohärente __Fälle__ als Rahmung für Third Space __einbringen__? 6-stufige Semantische Differentiale z.B. _"fragmentarisch"-"als ganze Fälle"_
+
+```{r myprettycode, echo=FALSE, collapse=TRUE, fig.cap='Art des Einbringens praktischer Erfahrung', fig.height=2.3, out.width="90%"}
+library(ggridges)
+
+icpl_ridge <- icpl %>%
+  pivot_longer(cols = c(hyb_p_2:hyb_p_5), names_to = "var", values_to = "hyb")
+
+# # Darstellung aller Semiantischen Differenziale horizontal mit mean und sd
+# ggplot(icpl_ridge, aes(y = var, x=hyb, color = gruppe, fill = gruppe)) +
+#   # geom_density_ridges(scale = .95, rel_min_height = 0.01, alpha = .4) +
+#   # scale_fill_viridis_c(name = "Likert Skala 1-6", option = "C") +
+#   scale_y_discrete(expand = c(0, 0), labels = c("fragmentarisch\nvs.\n als ganze Fälle", 
+#                                                 "oberflächlich\vs.\nin ihrer Komplexität", 
+#                                                 "skizzenhaft\nvs.\ndetailgenau", 
+#                                                 "flüchtig\nvs.\nausführlich") , name = "Begriffspaare") +
+#   scale_x_continuous(expand = c(0, 0), limits = c(1,6), breaks = c(1,2,3,4,5,6), name = "semantisches Differential") +
+#   scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+#   scale_color_manual(values = c("#D55E00", "#0072B2"), guide = "none") +
+#   scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"), guide = "none") +
+#   # coord_cartesian(clip = "off") +
+#   guides(fill = guide_legend(
+#     override.aes = list(
+#       fill = c("#D55E00A0", "#0072B2A0"),
+#       color = NA, point_color = NA)
+#     )
+#   ) +
+#   theme_ridges(center = TRUE)
+
+ggplot(icpl_ridge, aes(x=hyb, color = Gruppe, fill = Gruppe)) +
+  geom_density(alpha = .4, adjust = 1.5) +
+  scale_y_discrete(expand = c(0, 0), name = "") +
+  scale_x_continuous(expand = c(0, 0), limits = c(1,6), breaks = c(1,2,3,4,5,6), labels = c("frag-\nmentarisch","","","","","als ganze\nFälle"), name = "semantisches Differential") +
+  scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+  scale_color_manual(values = c("#D55E00", "#0072B2"), guide = "none") +
+  scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"), guide = "none") +
+  # coord_cartesian(clip = "off") +
+  guides(fill = guide_legend(
+    override.aes = list(
+      fill = c("#D55E00A0", "#0072B2A0"),
+      color = NA, point_color = NA)
+    )
+  ) +
+  theme_ridges(center = TRUE) +
+  coord_fixed(ratio=5)
+```
+\
+
+Welche __Überzeugungen__ zum Verhältnis von Theorie und Praxis [@deweetal.1992] vertreten die Studierenden?
+
+```{r , collapse=TRUE, fig.cap='Überzeugungen der Studierenden', fig.height=2.3, out.width="90%"}
+
+icpl_u <- rio::import("data/icpl.csv") %>%
+             dplyr::filter(created > "2020-01-30" & !str_detect(session, "XXX")) %>%
+             dplyr::select(tfe_1_sr:rel_4_sr) %>%
+             mutate(tfe = rowMeans(data.frame(tfe_1_sr, tfe_2_sr, tfe_3_sr, tfe_4_sr, tfe_5_sr)),
+                    sel = rowMeans(data.frame(sel_1_sr, sel_2_sr, tfe_3_sr, sel_4_sr, sel_5_sr)),
+                    enr = rowMeans(data.frame(enr_1_sr, enr_2_sr, tfe_3_sr, enr_4_sr, enr_5_sr)),
+                    rel = rowMeans(data.frame(rel_1_sr, rel_2_sr, tfe_3_sr, rel_4_sr))
+                    ) %>%
+             dplyr::select(tfe, sel, enr, rel) %>%
+             pivot_longer(cols = 1:4, names_to = "variable", values_to = "value") %>%
+             mutate(Stichprobe = "Blended Learning")
+
+
+# zweiter datensatz ###    
+    ueberz_raw <- rio::import("data/UzVvTP_LAS_II.csv")
+    
+    ueberz <- ueberz_raw %>%
+    mutate(Transfer_st = base::rowMeans(data.frame(tfe_1_st, tfe_2_st, tfe_3_st, tfe_4_st, tfe_5_st), na.rm = T),
+           Selektion_st = rowMeans(data.frame(sel_1_st, sel_2_st, sel_3_st, sel_4_st, sel_5_st), na.rm = T),
+           Enrichment_st = rowMeans(data.frame(enr_1_st, enr_2_st, enr_3_st, enr_4_st, enr_5_st), na.rm = T),
+           Relationierung_st = rowMeans(data.frame(rel_1_st, rel_2_st, rel_3_st, rel_4_st), na.rm = T),
+           Transfer_sr = rowMeans(data.frame(tfe_1_sr, tfe_2_sr, tfe_3_sr, tfe_4_sr, tfe_5_sr), na.rm = T),
+           Selektion_sr = rowMeans(data.frame(sel_1_sr, sel_2_sr, sel_3_sr, sel_4_sr, sel_5_sr), na.rm = T),
+           Enrichment_sr = rowMeans(data.frame(enr_1_sr, enr_2_sr, enr_3_sr, enr_4_sr, enr_5_sr), na.rm = T),
+           Relationierung_sr = rowMeans(data.frame(rel_1_sr, rel_2_sr, rel_3_sr, rel_4_sr), na.rm = T),
+           tfe = rowMeans(data.frame(Transfer_st, Transfer_sr)),
+           sel = rowMeans(data.frame(Selektion_st, Selektion_sr)),
+           enr = rowMeans(data.frame(Enrichment_st, Enrichment_sr)),
+           rel = rowMeans(data.frame(Relationierung_sr, Relationierung_st)),
+           created = lubridate::ymd_hms(created)) %>%
+        select(tfe:rel) %>%
+        pivot_longer(cols = 1:4, names_to = "variable", values_to = "value") %>%
+        mutate(Stichprobe = "Tübingen")
+    
+df_plot <- bind_rows(icpl_u, ueberz)
+    
+    
+source("R_rainclouds.R")
+
+ggplot(df_plot, aes(x=variable, y = value, fill = Stichprobe)) + 
+                geom_flat_violin(position = position_nudge(x = 0, y = 0), adjust = 1.5, trim = FALSE, alpha = .5, colour = NA) + 
+                # geom_boxplot(outlier.shape = NA, alpha = .5, width = .1, colour = "black") +
+                # scale_colour_brewer(palette = "Dark2")+
+                # scale_fill_brewer(palette = "Dark2") +
+    scale_y_continuous(limits = c(1,6), breaks = c(1,2,3,4,5,6), minor_breaks = NULL, expand = c(0, 0)) + 
+        theme_light() + 
+        theme(axis.title.x = element_blank()) +
+        ylab("Zustimmung") +
+      scale_x_discrete(labels = c("Enrichment", "Relationierung", "Selektion", "Transfer"), name = "") +
+    scale_fill_manual(values = c("#D55E0050", "#0072B250")) +
+  scale_color_manual(values = c("#D55E00", "#0072B2"), guide = "none") +
+  scale_discrete_manual("point_color", values = c("#D55E00", "#0072B2"), guide = "none")
+```
+
+# Literatur
